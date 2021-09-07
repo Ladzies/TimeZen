@@ -1,129 +1,86 @@
-const timerDigit = document.querySelector('.timerDigit')
+const timerCirclePath = document.querySelector('.timerCirclePath')
+const timerDisplay = document.querySelector('.timerDisplay')
+const timerBox = document.querySelector('.timerBox')
+const timerArm = document.querySelector('.timerArm')
 
-const loader = document.getElementById('loader')
-let α = 250
-let π = Math.PI
+/**
+ When Document Loads
+ */
+document.addEventListener('DOMContentLoaded', () => documentDidLoad())
 
-const cursor = {
-	X: 0,
-	Y: 0,
-}
-
-const entry = {
-	granted: false,
+function documentDidLoad() {
+	console.log('Document Loaded')
 }
 
 /**
- Rotate Handler
+ When Timer Arm Is Grabbed
  */
+timerArm.addEventListener('mousedown', timerHandler)
 
-const rotateHand = event => {
+function timerHandler(event) {
 	let rotating = true
-	const rect = document.querySelector('.timerFace').getBoundingClientRect() // get clock size and position
-
-	const centerY = (rect.bottom - rect.top) / 2 + rect.top
-	const threshY = -(centerY / innerHeight - 0.5)
-
-	const radius = rect.width / 2 // calculate radius based on size
-	const radians = e => Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius)) // account for position
-
-	const rotateHandler = e => {
-		let rotateDegrees = radians(e) * (180 / Math.PI) * -1 - 180
-		const snappedDegrees = Math.round(rotateDegrees / 30) * 30
-		console.log(rotateDegrees)
-
-		const draw = () => {
-			const radius = 125
-			α = 360 - rotateDegrees
-			α %= 360
-			var r = (α * π) / -180,
-				x = Math.sin(r) * radius,
-				y = Math.cos(r) * -radius,
-				mid = α > 180 ? 1 : 0,
-				anim =
-					'M 0 0 v ' +
-					-radius +
-					' A ' +
-					radius +
-					' ' +
-					radius +
-					' 1 ' +
-					mid +
-					' 0 ' +
-					x +
-					' ' +
-					y +
-					' z'
-
-			loader.setAttribute('d', anim)
-		}
-
-		cursor.X = e.clientX / innerWidth - 0.5
-		cursor.Y = -(e.clientY / innerHeight - 0.5)
-
-		// if (cursor.X > 0 && cursor.Y > threshY) {
-		// 	console.log('RIGHT TOP')
-		// } else if (cursor.X > 0 && cursor.Y < threshY) {
-		// 	console.log('RIGHT BOTTOM')
-		// } else if (cursor.X < 0 && cursor.Y < threshY) {
-		// 	console.log('LEFT BOTTOM')
-		// } else if (cursor.X < 0 && cursor.Y > threshY) {
-		// 	console.log('LEFT TOP')
-		// }
-
-		draw()
-
-		if (rotating) {
-			event.target.style.transform = `rotate(${rotateDegrees}deg)`
-		}
-		timerDigit.innerHTML = `${-snappedDegrees / 6}:00`
+	const rect = timerBox.getBoundingClientRect()
+	const radius = rect.width / 2
+	const rotateDegrees = e => {
+		const radians = Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius))
+		return radians * (180 / Math.PI) * -1 - 180
 	}
 
-	const cancelRotate = e => {
-		let rotateDegrees = radians(e) * (180 / Math.PI) * -1 - 180
-		const snappedDegrees = Math.round(rotateDegrees / 30) * 30
+	const onRotateStart = e => {
+		const calcDegrees = rotateDegrees(e)
+		const calcSnapped = Math.round(calcDegrees / 30) * 30
+		console.log(calcSnapped)
 
-		console.log(snappedDegrees)
+		draw(calcDegrees)
 
-		const draw = () => {
-			const radius = 125
-			α = 360 - snappedDegrees
-			α %= 360
-			var r = (α * π) / -180,
-				x = Math.sin(r) * radius,
-				y = Math.cos(r) * -radius,
-				mid = α > 180 ? 1 : 0,
-				anim =
-					'M 0 0 v ' +
-					-radius +
-					' A ' +
-					radius +
-					' ' +
-					radius +
-					' 1 ' +
-					mid +
-					' 0 ' +
-					x +
-					' ' +
-					y +
-					' z'
+		rotating ? (event.target.style.transform = `rotate(${calcDegrees}deg)`) : null
 
-			loader.setAttribute('d', anim)
-		}
-		draw()
+		timerDisplay.textContent = `${-calcSnapped / 6}:00`
+	}
 
-		if (rotating) {
-			event.target.style.transform = `rotate(${snappedDegrees}deg)`
-		}
+	const onRotateRelease = e => {
+		const calcDegrees = rotateDegrees(e)
+		const calcSnapped = Math.round(calcDegrees / 30) * 30
+
+		draw(calcSnapped)
+
+		rotating ? (event.target.style.transform = `rotate(${calcSnapped}deg)`) : null
+
 		rotating = !rotating
-		document.removeEventListener('mousemove', rotateHandler)
-		document.removeEventListener('mouseup', cancelRotate)
+		document.removeEventListener('mousemove', onRotateStart)
+		document.removeEventListener('mouseup', onRotateRelease)
 	}
 
-	document.addEventListener('mousemove', rotateHandler)
-	document.addEventListener('mouseup', cancelRotate)
+	document.addEventListener('mousemove', onRotateStart)
+	document.addEventListener('mouseup', onRotateRelease)
 }
 
-//
+/**
+ Logic
+ */
+function draw(degree) {
+	let angle
+	const radius = 125
+	angle = 360 - degree
+	angle %= 360
+	const r = (angle * Math.PI) / -180,
+		x = Math.sin(r) * radius,
+		y = Math.cos(r) * -radius,
+		mid = angle > 180 ? 1 : 0, // change this to 0 : 1 to reverse
+		anim =
+			'M 0 0 v ' +
+			-radius +
+			' A ' +
+			radius +
+			' ' +
+			radius +
+			' 1 ' +
+			mid +
+			' 0 ' + // change this to 1 to reverse
+			x +
+			' ' +
+			y +
+			' z'
 
-document.querySelector('.timerHand').addEventListener('mousedown', rotateHand)
+	timerCirclePath.setAttribute('d', anim)
+}

@@ -10,6 +10,7 @@ body {
 	justify-content: center;
 	align-items: center;
 	font-family: 'Nunito', sans-serif;
+	background-color: #212328;
 }
 
 * {
@@ -23,24 +24,37 @@ body {
 	align-items: center;
 }
 
-.timerDigit {
+.timerDisplay {
 	margin-top: 20px;
-	color: #0c1b1d60;
+	color: #9896a7;
+}
+
+.btn {
+	margin-top: 10px;
+	outline: 0;
+	border: 0;
+	padding: 14px 40px;
+	border-radius: 6px;
+	font-weight: 600;
+	text-transform: uppercase;
+	background-color: #5035ff;
+	color: white;
+	box-shadow: 0 5px 10px #5035ff40;
 }
 
 /**
 * Timer Hand
 */
-.timerHand {
+.timerArm {
 	width: var(--width);
 	height: var(--height);
 	border-radius: calc(var(--width) / 2);
-	background-color: #00b7c1;
+	background-color: #9383ff;
 	position: absolute;
 	transform-origin: calc(var(--width) / 2) calc(var(--height) - (var(--width) / 2));
 	top: 30px;
 	transform: rotate(0deg);
-	box-shadow: 0 0 10px #0b828f83;
+	box-shadow: 0 0 10px #5035ff;
 
 	/* cursor: grab; */
 }
@@ -49,7 +63,7 @@ body {
 	width: 2px;
 	height: 5px;
 	border-radius: 50px;
-	background-color: #42424240;
+	background-color: #b8adff70;
 	position: absolute;
 	transform-origin: 0% 0%;
 }
@@ -58,7 +72,8 @@ body {
 	width: 3px;
 	height: 18px;
 	border-radius: 1.5px;
-	background-color: #0c1b1d90;
+	background-color: #b8adff;
+	box-shadow: 0 0 5px #5035ff50;
 	position: absolute;
 	transform-origin: 0% 0%;
 }
@@ -72,7 +87,7 @@ body {
 	position: relative;
 }
 
-.timerFace {
+.timerBox {
 	border-radius: 50%;
 	width: 250px;
 	height: 250px;
@@ -80,21 +95,7 @@ body {
 	position: relative;
 }
 
-/* 
-.timerInnerCircle {
-	height: 150px;
-	width: 150px;
-	transform: rotate(45deg);
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	border-radius: 50%;
-	background-color: #cee7ea;
-	transform: skewX(22.5deg);
-} */
-
-.timerInnerCircle {
+.timerCircle {
 	width: 150px;
 	height: 150px;
 	display: block;
@@ -104,19 +105,19 @@ body {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	background-color: #cee7ea;
+	background-color: #745ff820;
 	border-radius: 50%;
 }
 
-.timerInnerCircle #loader {
-	fill: #7ac9d1;
+.timerCircle .timerCirclePath {
+	fill: #5e46f7;
 }
 
-.timerInnerCenterBack {
+.timerCenterBack {
 	width: 30px;
 	height: 30px;
-	background-color: #def1f3;
-	box-shadow: 0 4px 8px #0b828f83;
+	background-color: #a89bfaa2;
+	box-shadow: 0 4px 8px #5035ff;
 	border-radius: 50%;
 	position: absolute;
 	top: 50%;
@@ -124,11 +125,11 @@ body {
 	transform: translate(-50%, -50%);
 }
 
-.timerInnerCenterFront {
+.timerCenterFront {
 	width: 20px;
 	height: 20px;
 	background-color: white;
-	box-shadow: 0 2px 8px #0b828f83;
+	box-shadow: 0 2px 8px #5035ff;
 	z-index: 1;
 	border-radius: 50%;
 	position: absolute;

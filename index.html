@@ -16,7 +16,7 @@
 
     <div class="contain">
         <div class="timerContainer">
-            <div class="timerFace">
+            <div class="timerBox">
                 <div class="pointerLong" style="transform: rotate(90deg); left: 100%; top: 50%;"></div>
                 <div class="pointerShort" style="transform: rotate(96deg); left: 99.7261%; top: 55.2264%;"></div>
                 <div class="pointerShort" style="transform: rotate(102deg); left: 98.9074%; top: 60.3956%;"></div>
@@ -79,16 +79,17 @@
                 <div class="pointerShort" style="transform: rotate(444deg); left: 99.7261%; top: 44.7736%;"></div>
 
 
-                <div class="timerInnerCenterFront"></div>
-                <div class="timerInnerCenterBack"></div>
-                <svg class="timerInnerCircle" viewbox="0 0 250 250">
-                    <path id="loader" transform="translate(125, 125)" />
+                <div class="timerCenterFront"></div>
+                <div class="timerCenterBack"></div>
+                <svg class="timerCircle" viewbox="0 0 250 250">
+                    <path class="timerCirclePath" transform="translate(125, 125)" />
                 </svg>
             </div>
-            <div class="timerHand" style="transform: rotate(0deg);"></div>
+            <div class="timerArm" style="transform: rotate(0deg);"></div>
 
         </div>
-        <h1 class="timerDigit">00:00</h1>
+        <h1 class="timerDisplay">00:00</h1>
+        <button class="btn">Start Session</button>
     </div>
 
 
