@@ -8,6 +8,7 @@ const settings = {
 
 const state = {
 	minutes: null,
+	degree: null,
 }
 
 // Formulas Object
@@ -44,10 +45,14 @@ document.addEventListener('DOMContentLoaded', () => documentDidLoad())
 
 function documentDidLoad() {
 	console.log('Document Loaded')
+
+	startButton.disabled = false
 	state.minutes = getTotalTime()
-	timerArm.style.transform = `rotate(${formulas.calcDefaultDegree()}deg)`
-	draw(formulas.calcDefaultDegree())
-	timerDisplay.textContent = `${getTotalTime()}:00`
+	state.degree = formulas.calcDefaultDegree()
+	// console.log(state.degree)
+	timerArm.style.transform = `rotate(${state.degree}deg)`
+	draw(state.degree)
+	timerDisplay.textContent = `${state.minutes}:00`
 	changeOpacity('', 0)
 }
 
@@ -100,12 +105,13 @@ function timerHandler(event) {
 			Math.round(calcLiveDegree(e) / formulas.calcDegreePerStep()) * formulas.calcDegreePerStep()
 
 		draw(calcLiveDegree(e))
-		// console.log('liveDegree: ' + calcLiveDegree(e))
-		// console.log('currentDegree: ' + calcSnapped)
-		// console.log('deltaDegree => ' + getDeltaDeg(calcSnapped))
-		// console.log('totalTimer => ' + getTotalTime(calcSnapped))
-		// console.log('')
-		rotating ? (event.target.style.transform = `rotate(${calcLiveDegree(e)}deg)`) : null
+
+		console.log('liveDegree: ' + calcLiveDegree(e))
+		console.log('currentDegree: ' + calcSnapped)
+		console.log('deltaDegree => ' + getDeltaDeg(calcSnapped))
+		console.log('totalTimer => ' + getTotalTime(calcSnapped))
+		console.log('')
+		rotating ? (timerArm.style.transform = `rotate(${calcLiveDegree(e)}deg)`) : null
 		timerDisplay.textContent = `${getTotalTime(calcSnapped)}:00`
 	}
 
@@ -115,8 +121,11 @@ function timerHandler(event) {
 			Math.round(calcLiveDegree(e) / formulas.calcDegreePerStep()) * formulas.calcDegreePerStep()
 
 		draw(calcSnapped)
+		state.minutes = getTotalTime(calcSnapped) // state minutes
+		state.degree = calcSnapped // state degree
 		console.log(getTotalTime(calcSnapped))
-		state.minutes = getTotalTime(calcSnapped)
+		console.log('state.degree: ' + state.degree)
+		console.log('state.minutes: ' + state.minutes)
 
 		rotating ? (event.target.style.transform = `rotate(${calcSnapped}deg)`) : null
 
@@ -132,25 +141,36 @@ function timerHandler(event) {
 startButton.addEventListener('click', timer)
 
 function timer() {
+	startButton.disabled = true
 	let minute = state.minutes - 1
 	let sec = 59
+	let full = -360
 
-	setInterval(() => {
-		timerDisplay.textContent = minute + ':' + pad(sec)
+	// const deltaVelocity = -(formulas.calcDefaultDegree() / (getTotalTime() * 60))
+	const deltaVelocity = -state.degree / (state.minutes * 60)
+	const deltaFullVelocity = 360 / (state.minutes * 60)
+
+	const timer = setInterval(() => {
+		let varOne = (state.degree += deltaVelocity) // option 1
+		let varTwo = (full += deltaFullVelocity) // option 2
+
+		draw(varTwo) // rotates the inner fill
+		timerArm.style.transform = `rotate(${varTwo}deg)` // rotates the arm
+
+		// draw((full += deltaFullVelocity))
+		const formattedSec = sec < 10 ? '0' + sec : sec
+		timerDisplay.textContent = minute + ':' + formattedSec
 		sec--
 		if (sec < 0) {
 			minute--
 			sec = 59
-			if (minute === 0) {
-				console.log('times up')
-			}
+		}
+		if (minute < 0) {
+			console.log('times up')
+			clearInterval(timer)
 		}
 	}, 1000)
 }
 function startTimer() {
 	console.log('start')
-}
-
-function pad(n) {
-	return n < 10 ? '0' + n : n
 }
