@@ -3,7 +3,7 @@
 const settings = {
 	defaultArmPosition: 2, //default index is where the tick is by default
 	totalSteps: 12, //total steps for completing 360 deg
-	timeEachStep: 5,
+	timeEachStep: 10,
 }
 
 const state = {
@@ -38,14 +38,17 @@ const timerArm = document.querySelector('.timerArm')
 const startButton = document.querySelector('.btn')
 const pointerShort = document.querySelectorAll('.pointerShort')
 
+const timeStart = document.querySelector('.timeStart')
+const timeEnd = document.querySelector('.timeEnd')
+
 /**
  Event When Document Loads
  */
+
 document.addEventListener('DOMContentLoaded', () => documentDidLoad())
 
 function documentDidLoad() {
 	console.log('Document Loaded')
-
 	startButton.disabled = false
 	state.minutes = getTotalTime()
 	state.degree = formulas.calcDefaultDegree()
@@ -54,6 +57,7 @@ function documentDidLoad() {
 	draw(state.degree)
 	timerDisplay.textContent = `${state.minutes}:00`
 	changeOpacity('', 0)
+	updateDate(state.minutes)
 }
 
 /**
@@ -93,6 +97,7 @@ function draw(degree) {
 
 function timerHandler(event) {
 	let rotating = true
+
 	const calcLiveDegree = e => {
 		const radians = Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius))
 		return radians * (180 / Math.PI) * -1 - 180
@@ -105,14 +110,18 @@ function timerHandler(event) {
 			Math.round(calcLiveDegree(e) / formulas.calcDegreePerStep()) * formulas.calcDegreePerStep()
 
 		draw(calcLiveDegree(e))
-
+		state.minutes = getTotalTime(calcSnapped) // state minutes
+		state.degree = calcSnapped // state degree
 		console.log('liveDegree: ' + calcLiveDegree(e))
 		console.log('currentDegree: ' + calcSnapped)
 		console.log('deltaDegree => ' + getDeltaDeg(calcSnapped))
 		console.log('totalTimer => ' + getTotalTime(calcSnapped))
+		console.log('state.degree: ' + state.degree)
+		console.log('state.minutes: ' + state.minutes)
 		console.log('')
 		rotating ? (timerArm.style.transform = `rotate(${calcLiveDegree(e)}deg)`) : null
 		timerDisplay.textContent = `${getTotalTime(calcSnapped)}:00`
+		updateDate(state.minutes)
 	}
 
 	function onRotateRelease(e) {
@@ -173,4 +182,22 @@ function timer() {
 }
 function startTimer() {
 	console.log('start')
+}
+
+function updateDate(minutes) {
+	const formattedDigits = selection => (selection < 10 ? '0' + selection : selection)
+	const dayHour = new Date().getHours()
+	const dayMinute = new Date().getMinutes()
+
+	let futureMin = parseInt(formattedDigits(dayMinute)) + minutes
+	let futureHour = parseInt(dayHour)
+	console.log(futureMin)
+	console.log(Math.round(futureMin / 60))
+	if (futureMin >= 60) {
+		futureHour += Math.round(futureMin / 60)
+		// futureMin -= 60
+	}
+
+	timeStart.textContent = `${dayHour}:${formattedDigits(dayMinute)}`
+	timeEnd.textContent = `${futureHour}:${formattedDigits(futureMin)}`
 }
