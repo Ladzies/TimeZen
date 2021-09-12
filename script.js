@@ -46,7 +46,9 @@ const Query = {
 	timerDisplay: document.querySelector('.timerDisplay'),
 	timerBox: document.querySelector('.timerBox'),
 	timerArm: document.querySelector('.timerArm'),
-	startButton: document.querySelector('.btn'),
+	startButton: document.querySelector('.btn_start'),
+	stopButton: document.querySelector('.btn_stop'),
+	startButtonText: document.querySelector('.btn_text'),
 	pointerShort: document.querySelectorAll('.pointerShort'),
 }
 
@@ -54,18 +56,15 @@ const Query = {
  Event When Document Loads
  */
 
-document.addEventListener('DOMContentLoaded', () => documentDidLoad())
-
-function documentDidLoad() {
-	// console.log('Document Loaded')
-	State.minutes = Formula.calcTotalTime()
-	State.degree = Formula.calcDefaultDegree()
-	Query.startButton.disabled = false
-	Query.timerArm.style.transform = `rotate(${State.degree}deg)`
-	Query.timerDisplay.textContent = `${State.minutes}:00`
-	Interaction.changeOpacity('', 0)
-	draw(State.degree)
-}
+// console.log('Document Loaded')
+State.minutes = Formula.calcTotalTime()
+State.degree = Formula.calcDefaultDegree()
+Query.stopButton.style.display = 'none'
+Query.startButton.disabled = false
+Query.timerArm.style.transform = `rotate(${State.degree}deg)`
+Query.timerDisplay.textContent = `${State.minutes}:00`
+Interaction.changeOpacity('', 0)
+draw(State.degree)
 
 /**
  Event When Timer Arm Is Grabbed
@@ -112,7 +111,7 @@ function timerHandler(event) {
 		State.minutes = Formula.calcTotalTime(Formula.calcClosestLiveDegree(e)) // State minutes
 		State.degree = Formula.calcClosestLiveDegree(e) // State degree
 
-		rotating ? (Query.timerArm.style.transform = `rotate(${Formula.calcLiveDegree(e)}deg)`) : null
+		rotating ? (event.target.style.transform = `rotate(${Formula.calcLiveDegree(e)}deg)`) : null
 		Query.timerDisplay.textContent = `${Formula.calcTotalTime(Formula.calcClosestLiveDegree(e))}:00`
 
 		console.log('liveDegree: ' + Formula.calcLiveDegree(e))
@@ -127,7 +126,6 @@ function timerHandler(event) {
 		draw(Formula.calcClosestLiveDegree(e))
 		State.minutes = Formula.calcTotalTime(Formula.calcClosestLiveDegree(e)) // State minutes
 		State.degree = Formula.calcClosestLiveDegree(e) // State degree
-
 		rotating
 			? (event.target.style.transform = `rotate(${Formula.calcClosestLiveDegree(e)}deg)`)
 			: null
@@ -141,17 +139,19 @@ function timerHandler(event) {
 	document.addEventListener('mouseup', onRotateRelease)
 }
 
-Query.startButton.addEventListener('click', timer)
+Query.startButton.addEventListener('click', startTimer)
 
-function timer() {
-	Query.startButton.disabled = true
+function startTimer() {
+	// Query.startButton.disabled = true
+	Query.startButton.style.display = 'none'
+	Query.stopButton.style.display = 'block'
+
 	let minute = State.minutes - 1
 	let sec = 59
 	let full = -360
 
-	const tickVelocity = 360 / (State.minutes * 60)
-
-	const timer = setInterval(() => {
+	const timerInterval = setInterval(() => {
+		const tickVelocity = 360 / (State.minutes * 60)
 		let ticked = (full += tickVelocity)
 
 		draw(ticked)
@@ -164,10 +164,16 @@ function timer() {
 		}
 		if (minute < 0) {
 			console.log('times up')
-			clearInterval(timer)
+			clearInterval(timerInterval)
 		}
 	}, 1000)
-}
-function startTimer() {
-	console.log('start')
+
+	Query.stopButton.addEventListener('click', stopTimer)
+
+	function stopTimer() {
+		console.log('Timer Stop')
+		Query.startButton.style.display = 'block'
+		Query.stopButton.style.display = 'none'
+		clearInterval(timerInterval)
+	}
 }

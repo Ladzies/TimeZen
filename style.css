@@ -55,7 +55,24 @@ h6 {
 	top: 4px;
 }
 
-.btn {
+.btn_start {
+	background: linear-gradient(#2b2b4350, #2b2b43);
+	background-color: #323250;
+	border-radius: 50px;
+	border: 0;
+	box-shadow: 0 5px 10px #5035ff10;
+	color: #e3f0fa;
+	font-family: 'Inter';
+	font-size: 18px;
+	font-weight: 500;
+	margin-top: 10px;
+	position: relative;
+	height: 90px;
+	width: 90px;
+	transition: all 250ms;
+}
+
+.btn_stop {
 	background: linear-gradient(#2b2b4350, #2b2b43);
 	background-color: #323250;
 	border-radius: 50px;
