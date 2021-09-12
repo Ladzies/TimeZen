@@ -149,6 +149,7 @@ function startTimer() {
 	// Query.startButton.disabled = true
 	Query.startButton.style.display = 'none'
 	Query.stopButton.style.display = 'block'
+	Query.timerArm.removeEventListener('mousedown', timerHandler) //makes sure that user can't interact with the arm during the running of the timer
 
 	const timerInterval = setInterval(() => {
 		const tickVelocity = 360 / (State.minutes * 60)
@@ -176,4 +177,11 @@ function startTimer() {
 		Query.stopButton.style.display = 'none'
 		clearInterval(timerInterval)
 	}
+
+	// TODO
+	// 1. Create 2 buttons next to Stop
+	// 1) 'Skip' on the right
+	// Taking a break
+	// 2) 'Reset' on the left
+	// Create a reset functionality and enable the event listener when timer is resetted
 }
