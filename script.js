@@ -141,14 +141,14 @@ function timerHandler(event) {
 
 Query.startButton.addEventListener('click', startTimer)
 
+let minute = State.minutes - 1
+let sec = 59
+let full = -360
+
 function startTimer() {
 	// Query.startButton.disabled = true
 	Query.startButton.style.display = 'none'
 	Query.stopButton.style.display = 'block'
-
-	let minute = State.minutes - 1
-	let sec = 59
-	let full = -360
 
 	const timerInterval = setInterval(() => {
 		const tickVelocity = 360 / (State.minutes * 60)
