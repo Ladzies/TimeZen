@@ -1,45 +1,49 @@
-// User Settings Object
-
-const settings = {
-	defaultArmPosition: 2, //default index is where the tick is by default
-	totalSteps: 12, //total steps for completing 360 deg
-	timeEachStep: 10,
+// SETTINGS
+const Settings = {
+	DEFAULT_ARM_INDEX: 2, //default index is where the tick is by default
+	TOTAL_STEPS: 12, //total steps for completing 360 deg
+	MINUTE_PER_STEP: 1,
 }
 
-const state = {
+// STATE
+const State = {
 	minutes: null,
 	degree: null,
 }
 
-// Formulas Object
-const formulas = {
-	calcDegreePerStep: () => -(360 / settings.totalSteps),
-	calcDefaultDegree: () => -(360 / settings.totalSteps) * settings.defaultArmPosition,
+// FORMULA
+const Formula = {
+	calcDegreePerStep: () => -(360 / Settings.TOTAL_STEPS),
+	calcDefaultDegree: () => -(360 / Settings.TOTAL_STEPS) * Settings.DEFAULT_ARM_INDEX,
+	calcLiveDegree: e =>
+		Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius)) * (180 / Math.PI) * -1 -
+		180,
+	calcClosestLiveDegree: e =>
+		Math.round(Formula.calcLiveDegree(e) / Formula.calcDegreePerStep()) *
+		Formula.calcDegreePerStep(),
+	calcTotalTime: (degree = Formula.calcDefaultDegree()) =>
+		(degree / Formula.calcDegreePerStep()) * Settings.MINUTE_PER_STEP,
 }
 
-const getTotalTime = (degree = formulas.calcDefaultDegree()) =>
-	(degree / formulas.calcDegreePerStep()) * settings.timeEachStep
-
-const getDeltaDeg = (degree = formulas.calcDefaultDegree()) => degree / formulas.calcDegreePerStep()
-
-const changeOpacity = (transition, opacity) => {
-	for (i = 0; i < pointerShort.length; i++) {
-		pointerShort[i].style.transition = transition
-		pointerShort[i].style.opacity = opacity
-	}
+// INTERACTION
+const Interaction = {
+	changeOpacity: (transition, opacity) => {
+		for (i = 0; i < Query.pointerShort.length; i++) {
+			Query.pointerShort[i].style.transition = transition
+			Query.pointerShort[i].style.opacity = opacity
+		}
+	},
 }
 
-// Some Queries
-
-const timerCirclePath = document.querySelector('.timerCirclePath')
-const timerDisplay = document.querySelector('.timerDisplay')
-const timerBox = document.querySelector('.timerBox')
-const timerArm = document.querySelector('.timerArm')
-const startButton = document.querySelector('.btn')
-const pointerShort = document.querySelectorAll('.pointerShort')
-
-const timeStart = document.querySelector('.timeStart')
-const timeEnd = document.querySelector('.timeEnd')
+// QUERY
+const Query = {
+	timerCirclePath: document.querySelector('.timerCirclePath'),
+	timerDisplay: document.querySelector('.timerDisplay'),
+	timerBox: document.querySelector('.timerBox'),
+	timerArm: document.querySelector('.timerArm'),
+	startButton: document.querySelector('.btn'),
+	pointerShort: document.querySelectorAll('.pointerShort'),
+}
 
 /**
  Event When Document Loads
@@ -48,23 +52,22 @@ const timeEnd = document.querySelector('.timeEnd')
 document.addEventListener('DOMContentLoaded', () => documentDidLoad())
 
 function documentDidLoad() {
-	console.log('Document Loaded')
-	startButton.disabled = false
-	state.minutes = getTotalTime()
-	state.degree = formulas.calcDefaultDegree()
-	// console.log(state.degree)
-	timerArm.style.transform = `rotate(${state.degree}deg)`
-	draw(state.degree)
-	timerDisplay.textContent = `${state.minutes}:00`
-	changeOpacity('', 0)
+	// console.log('Document Loaded')
+	State.minutes = Formula.calcTotalTime()
+	State.degree = Formula.calcDefaultDegree()
+	Query.startButton.disabled = false
+	Query.timerArm.style.transform = `rotate(${State.degree}deg)`
+	Query.timerDisplay.textContent = `${State.minutes}:00`
+	Interaction.changeOpacity('', 0)
+	draw(State.degree)
 }
 
 /**
  Event When Timer Arm Is Grabbed
  */
-timerArm.addEventListener('mousedown', timerHandler)
+Query.timerArm.addEventListener('mousedown', timerHandler)
 
-const rect = timerBox.getBoundingClientRect()
+const rect = Query.timerBox.getBoundingClientRect()
 const radius = rect.width / 2
 
 function draw(degree) {
@@ -91,50 +94,38 @@ function draw(degree) {
 			y +
 			' z'
 
-	timerCirclePath.setAttribute('d', anim)
+	Query.timerCirclePath.setAttribute('d', anim)
 }
 
 function timerHandler(event) {
 	let rotating = true
 
-	const calcLiveDegree = e => {
-		const radians = Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius))
-		return radians * (180 / Math.PI) * -1 - 180
-	}
-
 	function onRotateStart(e) {
-		changeOpacity('opacity 0.5s linear 0s', 1)
+		Interaction.changeOpacity('opacity 0.5s linear 0s', 1)
 
-		const calcSnapped =
-			Math.round(calcLiveDegree(e) / formulas.calcDegreePerStep()) * formulas.calcDegreePerStep()
+		draw(Formula.calcLiveDegree(e))
+		State.minutes = Formula.calcTotalTime(Formula.calcClosestLiveDegree(e)) // State minutes
+		State.degree = Formula.calcClosestLiveDegree(e) // State degree
 
-		draw(calcLiveDegree(e))
-		state.minutes = getTotalTime(calcSnapped) // state minutes
-		state.degree = calcSnapped // state degree
-		console.log('liveDegree: ' + calcLiveDegree(e))
-		console.log('currentDegree: ' + calcSnapped)
-		console.log('deltaDegree => ' + getDeltaDeg(calcSnapped))
-		console.log('totalTimer => ' + getTotalTime(calcSnapped))
-		console.log('state.degree: ' + state.degree)
-		console.log('state.minutes: ' + state.minutes)
+		rotating ? (Query.timerArm.style.transform = `rotate(${Formula.calcLiveDegree(e)}deg)`) : null
+		Query.timerDisplay.textContent = `${Formula.calcTotalTime(Formula.calcClosestLiveDegree(e))}:00`
+
+		console.log('liveDegree: ' + Formula.calcLiveDegree(e))
+		console.log('State.degree: ' + State.degree)
+		console.log('State.minutes: ' + State.minutes)
 		console.log('')
-		rotating ? (timerArm.style.transform = `rotate(${calcLiveDegree(e)}deg)`) : null
-		timerDisplay.textContent = `${getTotalTime(calcSnapped)}:00`
 	}
 
 	function onRotateRelease(e) {
-		changeOpacity('opacity 0.5s linear 0s', 0)
-		const calcSnapped =
-			Math.round(calcLiveDegree(e) / formulas.calcDegreePerStep()) * formulas.calcDegreePerStep()
+		Interaction.changeOpacity('opacity 0.5s linear 0s', 0)
 
-		draw(calcSnapped)
-		state.minutes = getTotalTime(calcSnapped) // state minutes
-		state.degree = calcSnapped // state degree
-		console.log(getTotalTime(calcSnapped))
-		console.log('state.degree: ' + state.degree)
-		console.log('state.minutes: ' + state.minutes)
+		draw(Formula.calcClosestLiveDegree(e))
+		State.minutes = Formula.calcTotalTime(Formula.calcClosestLiveDegree(e)) // State minutes
+		State.degree = Formula.calcClosestLiveDegree(e) // State degree
 
-		rotating ? (event.target.style.transform = `rotate(${calcSnapped}deg)`) : null
+		rotating
+			? (event.target.style.transform = `rotate(${Formula.calcClosestLiveDegree(e)}deg)`)
+			: null
 
 		rotating = !rotating
 		document.removeEventListener('mousemove', onRotateStart)
@@ -145,28 +136,28 @@ function timerHandler(event) {
 	document.addEventListener('mouseup', onRotateRelease)
 }
 
-startButton.addEventListener('click', timer)
+Query.startButton.addEventListener('click', timer)
 
 function timer() {
-	startButton.disabled = true
-	let minute = state.minutes - 1
+	Query.startButton.disabled = true
+	let minute = State.minutes - 1
 	let sec = 59
 	let full = -360
 
-	// const deltaVelocity = -(formulas.calcDefaultDegree() / (getTotalTime() * 60))
-	const deltaVelocity = -state.degree / (state.minutes * 60)
-	const deltaFullVelocity = 360 / (state.minutes * 60)
+	// const deltaVelocity = -(Formula.calcDefaultDegree() / (Formula.calcTotalTime() * 60))
+	const deltaVelocity = -State.degree / (State.minutes * 60)
+	const deltaFullVelocity = 360 / (State.minutes * 60)
 
 	const timer = setInterval(() => {
-		let varOne = (state.degree += deltaVelocity) // option 1
+		let varOne = (State.degree += deltaVelocity) // option 1
 		let varTwo = (full += deltaFullVelocity) // option 2
 
 		draw(varTwo) // rotates the inner fill
-		timerArm.style.transform = `rotate(${varTwo}deg)` // rotates the arm
+		Query.timerArm.style.transform = `rotate(${varTwo}deg)` // rotates the arm
 
 		// draw((full += deltaFullVelocity))
 		const formattedSec = sec < 10 ? '0' + sec : sec
-		timerDisplay.textContent = minute + ':' + formattedSec
+		Query.timerDisplay.textContent = minute + ':' + formattedSec
 		sec--
 		if (sec < 0) {
 			minute--
