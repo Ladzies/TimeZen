@@ -57,7 +57,6 @@ function documentDidLoad() {
 	draw(state.degree)
 	timerDisplay.textContent = `${state.minutes}:00`
 	changeOpacity('', 0)
-	updateDate(state.minutes)
 }
 
 /**
@@ -121,7 +120,6 @@ function timerHandler(event) {
 		console.log('')
 		rotating ? (timerArm.style.transform = `rotate(${calcLiveDegree(e)}deg)`) : null
 		timerDisplay.textContent = `${getTotalTime(calcSnapped)}:00`
-		updateDate(state.minutes)
 	}
 
 	function onRotateRelease(e) {
@@ -182,22 +180,4 @@ function timer() {
 }
 function startTimer() {
 	console.log('start')
-}
-
-function updateDate(minutes) {
-	const formattedDigits = selection => (selection < 10 ? '0' + selection : selection)
-	const dayHour = new Date().getHours()
-	const dayMinute = new Date().getMinutes()
-
-	let futureMin = parseInt(formattedDigits(dayMinute)) + minutes
-	let futureHour = parseInt(dayHour)
-	console.log(futureMin)
-	console.log(Math.round(futureMin / 60))
-	if (futureMin >= 60) {
-		futureHour += Math.round(futureMin / 60)
-		// futureMin -= 60
-	}
-
-	timeStart.textContent = `${dayHour}:${formattedDigits(dayMinute)}`
-	timeEnd.textContent = `${futureHour}:${formattedDigits(futureMin)}`
 }
