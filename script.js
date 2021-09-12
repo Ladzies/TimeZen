@@ -1,7 +1,7 @@
 // SETTINGS
 const Settings = {
-	DEFAULT_ARM_INDEX: 2, //default index is where the tick is by default
-	TOTAL_STEPS: 12, //total steps for completing 360 deg
+	DEFAULT_ARM_INDEX: 1, //default index is where the tick is by default
+	TOTAL_STEPS: 60, //total steps for completing 360 deg
 	MINUTE_PER_STEP: 1,
 }
 
@@ -11,7 +11,7 @@ const State = {
 	degree: null,
 }
 
-// FORMULA
+// FORMULA FUNCITON
 const Formula = {
 	calcDegreePerStep: () => -(360 / Settings.TOTAL_STEPS),
 	calcDefaultDegree: () => -(360 / Settings.TOTAL_STEPS) * Settings.DEFAULT_ARM_INDEX,
@@ -23,6 +23,11 @@ const Formula = {
 		Formula.calcDegreePerStep(),
 	calcTotalTime: (degree = Formula.calcDefaultDegree()) =>
 		(degree / Formula.calcDegreePerStep()) * Settings.MINUTE_PER_STEP,
+}
+
+// HELPER FUNCTIONS
+const Helper = {
+	formatDouble: digit => (digit < 10 ? '0' + digit : digit),
 }
 
 // INTERACTION
@@ -144,20 +149,14 @@ function timer() {
 	let sec = 59
 	let full = -360
 
-	// const deltaVelocity = -(Formula.calcDefaultDegree() / (Formula.calcTotalTime() * 60))
-	const deltaVelocity = -State.degree / (State.minutes * 60)
-	const deltaFullVelocity = 360 / (State.minutes * 60)
+	const tickVelocity = 360 / (State.minutes * 60)
 
 	const timer = setInterval(() => {
-		let varOne = (State.degree += deltaVelocity) // option 1
-		let varTwo = (full += deltaFullVelocity) // option 2
+		let ticked = (full += tickVelocity)
 
-		draw(varTwo) // rotates the inner fill
-		Query.timerArm.style.transform = `rotate(${varTwo}deg)` // rotates the arm
-
-		// draw((full += deltaFullVelocity))
-		const formattedSec = sec < 10 ? '0' + sec : sec
-		Query.timerDisplay.textContent = minute + ':' + formattedSec
+		draw(ticked)
+		Query.timerArm.style.transform = `rotate(${ticked}deg)`
+		Query.timerDisplay.textContent = minute + ':' + Helper.formatDouble(sec)
 		sec--
 		if (sec < 0) {
 			minute--
