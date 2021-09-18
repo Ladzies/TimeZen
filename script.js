@@ -1,17 +1,17 @@
-// SETTINGS
+// (OBJ) SETTINGS
 const Settings = {
-	DEFAULT_ARM_INDEX: 1, //default index is where the tick is by default
+	DEFAULT_ARM_INDEX: 3, //default index is where the tick is by default
 	TOTAL_STEPS: 60, //total steps for completing 360 deg
 	MINUTE_PER_STEP: 1,
 }
 
-// STATE
+// (OBJ) STATE
 const State = {
 	minutes: null,
 	degree: null,
 }
 
-// FORMULA FUNCITON
+// (OBJ) FORMULA FUNCITON
 const Formula = {
 	calcDegreePerStep: () => -(360 / Settings.TOTAL_STEPS),
 	calcDefaultDegree: () => -(360 / Settings.TOTAL_STEPS) * Settings.DEFAULT_ARM_INDEX,
@@ -25,12 +25,12 @@ const Formula = {
 		(degree / Formula.calcDegreePerStep()) * Settings.MINUTE_PER_STEP,
 }
 
-// HELPER FUNCTIONS
+// (OBJ) HELPER FUNCTIONS
 const Helper = {
 	formatDouble: digit => (digit < 10 ? '0' + digit : digit),
 }
 
-// INTERACTION
+// (OBJ) INTERACTION FUNCTIONS
 const Interaction = {
 	changeOpacity: (transition, opacity) => {
 		for (i = 0; i < Query.pointerShort.length; i++) {
@@ -40,7 +40,7 @@ const Interaction = {
 	},
 }
 
-// QUERY
+// (OBJ) QUERY
 const Query = {
 	timerCirclePath: document.querySelector('.timerCirclePath'),
 	timerDisplay: document.querySelector('.timerDisplay'),
@@ -53,10 +53,9 @@ const Query = {
 }
 
 /**
- Event When Document Loads
+	Initializing values and clock position and event listeners
  */
 
-// console.log('Document Loaded')
 State.minutes = Formula.calcTotalTime()
 State.degree = Formula.calcDefaultDegree()
 Query.stopButton.style.display = 'none'
@@ -65,14 +64,10 @@ Query.timerArm.style.transform = `rotate(${State.degree}deg)`
 Query.timerDisplay.textContent = `${State.minutes}:00`
 Interaction.changeOpacity('', 0)
 draw(State.degree)
-
-/**
- Event When Timer Arm Is Grabbed
- */
-Query.timerArm.addEventListener('mousedown', timerHandler)
-
 const rect = Query.timerBox.getBoundingClientRect()
 const radius = rect.width / 2
+Query.timerArm.addEventListener('mousedown', timerHandler)
+Query.startButton.addEventListener('click', startTimer)
 
 function draw(degree) {
 	let angle
@@ -82,7 +77,7 @@ function draw(degree) {
 	const r = (angle * Math.PI) / -180,
 		x = Math.sin(r) * radius,
 		y = Math.cos(r) * -radius,
-		mid = angle > 180 ? 1 : 0, // change this to 0 : 1 to reverse
+		mid = angle > 180 ? 1 : 0, // change this to 0 : 1 to reverse rotation
 		anim =
 			'M 0 0 v ' +
 			-radius +
@@ -92,7 +87,7 @@ function draw(degree) {
 			radius +
 			' 1 ' +
 			mid +
-			' 0 ' + // change this to 1 to reverse
+			' 0 ' + // change this to 1 to reverse rotation
 			x +
 			' ' +
 			y +
@@ -139,14 +134,12 @@ function timerHandler(event) {
 	document.addEventListener('mouseup', onRotateRelease)
 }
 
-Query.startButton.addEventListener('click', startTimer)
-
-let minute = State.minutes - 1
-let sec = 59
-let full = -360
-
 function startTimer() {
-	// Query.startButton.disabled = true
+	let minute = State.minutes - 1
+	let sec = 59
+	let full = -360
+
+	Query.startButton.disabled = true //might need to comment out
 	Query.startButton.style.display = 'none'
 	Query.stopButton.style.display = 'block'
 	Query.timerArm.removeEventListener('mousedown', timerHandler) //makes sure that user can't interact with the arm during the running of the timer
