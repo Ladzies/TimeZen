@@ -23,20 +23,23 @@ const Formula = {
 		return degreePerStep * defaultArmIndex
 	},
 	calcLiveDegree: e => {
-		const rect = Query.timerBox.getBoundingClientRect()
-		const radius = rect.width / 2
-		const radCalc = e => Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius))
-		const radToDeg = 180 / Math.PI
-		return -(radCalc(e) * radToDeg + 180)
+		const radCalc = e => {
+			const rect = Query.timerBox.getBoundingClientRect()
+			const radius = rect.width / 2
+			return Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius))
+		}
+		const radToDeg = -180 / Math.PI
+		return radCalc(e) * radToDeg - 180
 	},
 	calcClosestLiveDegree: e => {
-		return (
-			Math.round(Formula.calcLiveDegree(e) / Formula.calcDegreePerStep()) *
-			Formula.calcDegreePerStep()
-		)
+		const degreePerStep = Formula.calcDegreePerStep()
+		const liveDegreeRound = Math.round(Formula.calcLiveDegree(e) / degreePerStep)
+		return liveDegreeRound * degreePerStep
 	},
 	calcTotalTime: (degree = Formula.calcDefaultDegree()) => {
-		return (degree / Formula.calcDegreePerStep()) * Settings.MINUTE_PER_STEP
+		const deltaDegree = degree / Formula.calcDegreePerStep()
+		const minutePerStep = Settings.MINUTE_PER_STEP
+		return deltaDegree * minutePerStep
 	},
 }
 
