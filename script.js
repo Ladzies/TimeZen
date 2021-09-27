@@ -1,37 +1,47 @@
-// (OBJ) SETTINGS
+/**
+	Object Constants
+ */
 const Settings = {
-	DEFAULT_ARM_INDEX: 3, //default index is where the tick is by default
-	TOTAL_STEPS: 60, //total steps for completing 360 deg
+	DEFAULT_ARM_INDEX: 1,
+	TOTAL_STEPS: 12,
 	MINUTE_PER_STEP: 1,
 }
 
-// (OBJ) STATE
 const State = {
 	minutes: null,
 	degree: null,
 }
 
-// (OBJ) FORMULA FUNCITON
 const Formula = {
-	calcDegreePerStep: () => -(360 / Settings.TOTAL_STEPS),
-	calcDefaultDegree: () => -(360 / Settings.TOTAL_STEPS) * Settings.DEFAULT_ARM_INDEX,
-	calcLiveDegree: e =>
-		Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius)) * (180 / Math.PI) * -1 -
-		180,
-	calcClosestLiveDegree: e =>
-		Math.round(Formula.calcLiveDegree(e) / Formula.calcDegreePerStep()) *
-		Formula.calcDegreePerStep(),
-	calcTotalTime: (degree = Formula.calcDefaultDegree()) =>
-		(degree / Formula.calcDegreePerStep()) * Settings.MINUTE_PER_STEP,
+	calcDegreePerStep: () => {
+		const degreePerStep = -(360 / Settings.TOTAL_STEPS)
+		return degreePerStep
+	},
+	calcDefaultDegree: () => {
+		const degreePerStep = -(360 / Settings.TOTAL_STEPS)
+		const defaultArmIndex = Settings.DEFAULT_ARM_INDEX
+		return degreePerStep * defaultArmIndex
+	},
+	calcLiveDegree: e => {
+		const rect = Query.timerBox.getBoundingClientRect()
+		const radius = rect.width / 2
+		const radCalc = e => Math.atan2(e.pageX - (rect.x + radius), e.pageY - (rect.y + radius))
+		const radToDeg = 180 / Math.PI
+		return -(radCalc(e) * radToDeg + 180)
+	},
+	calcClosestLiveDegree: e => {
+		return (
+			Math.round(Formula.calcLiveDegree(e) / Formula.calcDegreePerStep()) *
+			Formula.calcDegreePerStep()
+		)
+	},
+	calcTotalTime: (degree = Formula.calcDefaultDegree()) => {
+		return (degree / Formula.calcDegreePerStep()) * Settings.MINUTE_PER_STEP
+	},
 }
 
-// (OBJ) HELPER FUNCTIONS
 const Helper = {
 	formatDouble: digit => (digit < 10 ? '0' + digit : digit),
-}
-
-// (OBJ) INTERACTION FUNCTIONS
-const Interaction = {
 	changeOpacity: (transition, opacity) => {
 		for (i = 0; i < Query.pointerShort.length; i++) {
 			Query.pointerShort[i].style.transition = transition
@@ -40,7 +50,6 @@ const Interaction = {
 	},
 }
 
-// (OBJ) QUERY
 const Query = {
 	timerCirclePath: document.querySelector('.timerCirclePath'),
 	timerDisplay: document.querySelector('.timerDisplay'),
@@ -55,19 +64,19 @@ const Query = {
 /**
 	Initializing values and clock position and event listeners
  */
+function init() {
+	State.minutes = Formula.calcTotalTime()
+	State.degree = Formula.calcDefaultDegree()
+	Query.stopButton.style.display = 'none'
+	Query.startButton.disabled = false
+	Query.timerArm.style.transform = `rotate(${State.degree}deg)`
+	Query.timerDisplay.textContent = `${State.minutes}:00`
+	Helper.changeOpacity('', 0)
+	draw(State.degree)
 
-State.minutes = Formula.calcTotalTime()
-State.degree = Formula.calcDefaultDegree()
-Query.stopButton.style.display = 'none'
-Query.startButton.disabled = false
-Query.timerArm.style.transform = `rotate(${State.degree}deg)`
-Query.timerDisplay.textContent = `${State.minutes}:00`
-Interaction.changeOpacity('', 0)
-draw(State.degree)
-const rect = Query.timerBox.getBoundingClientRect()
-const radius = rect.width / 2
-Query.timerArm.addEventListener('mousedown', timerHandler)
-Query.startButton.addEventListener('click', startTimer)
+	Query.timerArm.addEventListener('mousedown', timerHandler)
+	Query.startButton.addEventListener('click', startTimer)
+}
 
 function draw(degree) {
 	let angle
@@ -100,7 +109,7 @@ function timerHandler(event) {
 	let rotating = true
 
 	function onRotateStart(e) {
-		Interaction.changeOpacity('opacity 0.5s linear 0s', 1)
+		Helper.changeOpacity('opacity 0.5s linear 0s', 1)
 
 		draw(Formula.calcLiveDegree(e))
 		State.minutes = Formula.calcTotalTime(Formula.calcClosestLiveDegree(e)) // State minutes
@@ -116,7 +125,7 @@ function timerHandler(event) {
 	}
 
 	function onRotateRelease(e) {
-		Interaction.changeOpacity('opacity 0.5s linear 0s', 0)
+		Helper.changeOpacity('opacity 0.5s linear 0s', 0)
 
 		draw(Formula.calcClosestLiveDegree(e))
 		State.minutes = Formula.calcTotalTime(Formula.calcClosestLiveDegree(e)) // State minutes
@@ -178,3 +187,5 @@ function startTimer() {
 	// 2) 'Reset' on the left
 	// Create a reset functionality and enable the event listener when timer is resetted
 }
+
+init()
